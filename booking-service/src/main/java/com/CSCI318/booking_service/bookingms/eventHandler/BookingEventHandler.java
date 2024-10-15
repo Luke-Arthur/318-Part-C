@@ -1,11 +1,18 @@
 package com.CSCI318.booking_service.bookingms.eventHandler;
 
+import com.CSCI318.booking_service.bookingms.application.outboundservices.KafkaProducer;
+import com.CSCI318.booking_service.shareddomain.events.event.BookingCancelledEvent;
 import com.CSCI318.booking_service.shareddomain.events.event.BookingCreatedEvent;
+import com.CSCI318.booking_service.shareddomain.events.event.BookingUpdatedEvent;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 @Component
 public class BookingEventHandler {
+
+    @Autowired
+    private KafkaProducer kafkaProducer;
 
     // Static variable to keep track of the booking count
     private static long bookingCount = 0;
@@ -44,4 +51,37 @@ public class BookingEventHandler {
 
         System.out.println("=====================================================================");
     }
+
+    @EventListener
+    public void handleBookingUpdated(BookingUpdatedEvent event) {
+        System.out.println("=====================================================================");
+        System.out.println("Booking Updated Event for Booking ID: " + event.getBookingId());
+        System.out.println("Booking Update Time: " + event.getEventTime());
+
+        // Notionally email the member about the update
+        System.out.println("Notional Email sent to member regarding the update for booking ID: " + event.getBookingId());
+
+        // Send Kafka message for booking updated
+        kafkaProducer.sendMessage("booking-updated-topic", String.valueOf(event));
+
+        System.out.println("=====================================================================");
+    }
+
+    @EventListener
+    public void handleBookingCancelled(BookingCancelledEvent event) {
+        System.out.println("=====================================================================");
+        System.out.println("Booking Cancelled Event for Booking ID: " + event.getBookingId());
+        System.out.println("Booking Cancel Time: " + event.getEventTime());
+
+        // Notionally email the member about the cancellation
+        System.out.println("Notional Email sent to member regarding the cancellation of booking ID: " + event.getBookingId());
+
+        // Send Kafka message for booking cancelled
+        kafkaProducer.sendMessage("booking-cancelled-topic", String.valueOf(event));
+
+        System.out.println("=====================================================================");
+    }
+
+
+
 }

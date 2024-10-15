@@ -85,5 +85,22 @@ public class BookingController {
         bookingService.deleteBooking(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+
+    @PutMapping("/{id}")
+    public ResponseEntity<BookingDTO> updateBooking(@PathVariable Long id, @RequestBody Booking booking) {
+
+        booking.setId(id);
+
+        Booking updatedBooking = bookingService.updateBooking(booking);
+        if (updatedBooking == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        BookingDTO bookingDTO = new BookingDTO(updatedBooking);
+        return new ResponseEntity<>(bookingDTO, HttpStatus.OK);
+    }
+
+
 }
 

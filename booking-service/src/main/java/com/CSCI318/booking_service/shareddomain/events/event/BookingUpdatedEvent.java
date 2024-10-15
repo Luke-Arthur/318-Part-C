@@ -6,25 +6,26 @@ import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor
-public class BookingCreatedEvent {
+public class BookingUpdatedEvent {
 
     private final Long bookingId;
-    private final String memberEmail;
     private final LocalDateTime eventTime;
+    private final String memberEmail;
     private final String eventType;
 
-    public BookingCreatedEvent() {
+    // Default constructor
+    public BookingUpdatedEvent() {
         this.bookingId = null;
-        this.memberEmail = null;
         this.eventTime = null;
+        this.memberEmail = null;
         this.eventType = null;
     }
 
-    // Constructor with bookingId and memberEmail
-    public BookingCreatedEvent(Long bookingId, String memberEmail) {
+    // All args constructor for updated event
+    public BookingUpdatedEvent(Long bookingId, String memberEmail) {
         this.bookingId = bookingId;
-        this.memberEmail = memberEmail;
         this.eventTime = LocalDateTime.now();
-        this.eventType = "created";
+        this.memberEmail = memberEmail;
+        this.eventType = "updated";
     }
 }

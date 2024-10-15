@@ -1,12 +1,17 @@
 package com.CSCI318.booking_service.bookingms.application.BookingServices;
 
+import com.CSCI318.booking_service.bookingms.application.outboundservices.KafkaProducer;
 import com.CSCI318.booking_service.bookingms.interfaces.rest.DTO.BookingDTO;
 import com.CSCI318.booking_service.bookingms.domain.model.Booking;
 import com.CSCI318.booking_service.bookingms.domain.model.BookingTime;
+import com.CSCI318.booking_service.shareddomain.events.event.BookingCancelledEvent;
 import com.CSCI318.booking_service.shareddomain.events.event.BookingCreatedEvent;
 import com.CSCI318.booking_service.bookingms.infrastructure.repository.BookingRepository;
 import com.CSCI318.booking_service.bookingms.domain.model.Member;
 import com.CSCI318.booking_service.bookingms.domain.model.WorkoutClass;
+import com.CSCI318.booking_service.shareddomain.events.event.BookingUpdatedEvent;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -32,7 +37,10 @@ public class BookingService {
     private RestTemplate restTemplate;
 
     @Autowired
-    private ApplicationEventPublisher applicationEventPublisher;
+    private KafkaProducer kafkaProducer;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
 
     public List<Booking> getAllBookings() {
@@ -53,13 +61,24 @@ public class BookingService {
             booking.setBookingTime(new BookingTime(LocalDateTime.now()));
 
             // Save the booking and publish the event
-            return saveAndPublishBooking(booking);
+            Booking savedBooking = saveAndPublishBooking(booking);
+
+            // Trigger Kafka event
+            try {
+                String memberEmail = savedBooking.getMember().getEmail();
+                String eventJson = objectMapper.writeValueAsString(new BookingCreatedEvent(savedBooking.getId(),memberEmail));
+                kafkaProducer.sendMessage("booking-created", eventJson);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+         return savedBooking;
 
         } catch (EntityNotFoundException e) {
             // Handling the case where the member or workout class is not found
             System.err.println(e.getMessage());
             return null;
         }
+
     }
 
     @Transactional
@@ -74,6 +93,14 @@ public class BookingService {
 
                 // Save the booking and publish the event
                 saveAndPublishBooking(booking);
+
+                try {
+                    String email = booking.getMember().getEmail();
+                    String eventJson = objectMapper.writeValueAsString(new BookingCreatedEvent(booking.getId(), email));
+                    kafkaProducer.sendMessage("booking-created", eventJson);
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                }
             }
             return bookings;
         } catch (EntityNotFoundException e) {
@@ -113,11 +140,35 @@ public class BookingService {
         // Save the booking entity
         Booking savedBooking = bookingRepository.save(booking);
 
-        // Publish the event after the booking is saved
-        applicationEventPublisher.publishEvent(new BookingCreatedEvent(savedBooking.getId()));
+      try {
+            String email = savedBooking.getMember().getEmail();
+            String eventJson = objectMapper.writeValueAsString(new BookingCreatedEvent(savedBooking.getId(), email));
+            kafkaProducer.sendMessage("booking-created", eventJson);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
 
         return savedBooking;
     }
+
+    @Transactional
+    public Booking updateBooking(Booking booking) {
+        // Refactored method to fetch member and workout class details and set them in the booking
+        setMemberAndWorkoutClassDetails(booking);
+
+        // Update the booking entity
+        Booking updatedBooking = bookingRepository.save(booking);
+
+        try {
+            String email = updatedBooking.getMember().getEmail();
+            String eventJson = objectMapper.writeValueAsString(new BookingUpdatedEvent(updatedBooking.getId(), email));
+            kafkaProducer.sendMessage("booking-updated", eventJson);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return updatedBooking;
+    }
+
 
 
     // Our method to get the booking by ID. It returns a BookingDTO object so we can get the member and workout class details as well.
@@ -129,15 +180,27 @@ public class BookingService {
     }
 
 
-    // Our method to get the bookings in a given range - TODO: we should Test this again.
+    // Our method to get the bookings in a given range
     public List<Booking> getBookingsInRange(LocalDateTime start, LocalDateTime end) {
         return bookingRepository.findByBookingTime_TimeBetween(start, end);
     }
 
-    // Our delete method for the deleting the booking
+
+
+    // Method to handle deleting a booking and sending a Kafka event
     public void deleteBooking(Long id) {
         bookingRepository.deleteById(id);
+
+        try {
+            String email = getBookingById(id).getMember().getEmail();
+            String eventJson = objectMapper.writeValueAsString(new BookingCancelledEvent(id, email));
+            kafkaProducer.sendMessage("booking-cancelled", eventJson);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
     }
+
 
 
     // Fetching the member details from the member service

@@ -2,29 +2,35 @@ package com.CSCI318.booking_service.shareddomain.events.event;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor
-public class BookingCreatedEvent {
+
+public class BookingCancelledEvent {
 
     private final Long bookingId;
     private final String memberEmail;
     private final LocalDateTime eventTime;
     private final String eventType;
 
-    public BookingCreatedEvent() {
+    // Default constructor for cancelled event
+    public BookingCancelledEvent() {
         this.bookingId = null;
+        this.eventTime = LocalDateTime.now();
+        this.eventType = "cancelled";
         this.memberEmail = null;
-        this.eventTime = null;
-        this.eventType = null;
     }
 
-    // Constructor with bookingId and memberEmail
-    public BookingCreatedEvent(Long bookingId, String memberEmail) {
+    // all args constructor for cancelled event
+    public BookingCancelledEvent(Long bookingId, String memberEmail) {
         this.bookingId = bookingId;
-        this.memberEmail = memberEmail;
         this.eventTime = LocalDateTime.now();
-        this.eventType = "created";
+        this.eventType = "cancelled";
+        this.memberEmail = memberEmail;
     }
+
+
 }
