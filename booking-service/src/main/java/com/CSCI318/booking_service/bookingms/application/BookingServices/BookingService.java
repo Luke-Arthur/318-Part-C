@@ -65,8 +65,10 @@ public class BookingService {
 
             // Trigger Kafka event
             try {
+                Long memberId = booking.getMember().getId();
+                Long classId = booking.getWorkoutClass().getId();
                 String memberEmail = savedBooking.getMember().getEmail();
-                String eventJson = objectMapper.writeValueAsString(new BookingCreatedEvent(savedBooking.getId(),memberEmail));
+                String eventJson = objectMapper.writeValueAsString(new BookingCreatedEvent(savedBooking.getId(), memberId, classId, memberEmail));
                 kafkaProducer.sendMessage("booking-created", eventJson);
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
@@ -95,8 +97,10 @@ public class BookingService {
                 saveAndPublishBooking(booking);
 
                 try {
+                    Long memberId = booking.getMember().getId();
+                    Long classId = booking.getWorkoutClass().getId();
                     String email = booking.getMember().getEmail();
-                    String eventJson = objectMapper.writeValueAsString(new BookingCreatedEvent(booking.getId(), email));
+                    String eventJson = objectMapper.writeValueAsString(new BookingCreatedEvent(booking.getId(), memberId, classId, email));
                     kafkaProducer.sendMessage("booking-created", eventJson);
                 } catch (JsonProcessingException e) {
                     e.printStackTrace();
@@ -141,8 +145,10 @@ public class BookingService {
         Booking savedBooking = bookingRepository.save(booking);
 
       try {
+            Long memberId = booking.getMember().getId();
+            Long classId = booking.getWorkoutClass().getId();
             String email = savedBooking.getMember().getEmail();
-            String eventJson = objectMapper.writeValueAsString(new BookingCreatedEvent(savedBooking.getId(), email));
+            String eventJson = objectMapper.writeValueAsString(new BookingCreatedEvent(savedBooking.getId(), memberId, classId, email));
             kafkaProducer.sendMessage("booking-created", eventJson);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
@@ -192,8 +198,10 @@ public class BookingService {
         bookingRepository.deleteById(id);
 
         try {
+            Long memberId = getBookingById(id).getMember().getId();
+            Long classId = getBookingById(id).getWorkoutClass().getId();
             String email = getBookingById(id).getMember().getEmail();
-            String eventJson = objectMapper.writeValueAsString(new BookingCancelledEvent(id, email));
+            String eventJson = objectMapper.writeValueAsString(new BookingCancelledEvent(id, memberId, classId, email));
             kafkaProducer.sendMessage("booking-cancelled", eventJson);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
