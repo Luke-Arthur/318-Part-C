@@ -12,7 +12,11 @@ public class BookingTime {
 
     // the final keyword is used to make the time field immutable once it's set.
     // Also having no setter method for the time field makes it immutable.
-    private final LocalDateTime time;
+    private  LocalDateTime time;
+
+    public BookingTime() {
+
+    }
 
     public BookingTime(LocalDateTime time) {
         if (time.isBefore(LocalDateTime.now().minusSeconds(1))) {
@@ -21,9 +25,11 @@ public class BookingTime {
         this.time = time;
     }
 
-    public BookingTime() {
-        this.time = LocalDateTime.now();
+
+    public BookingTime(String time) {
+        this.time = LocalDateTime.parse(time, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
     }
+
 
     public String getFormattedBookingTime() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");

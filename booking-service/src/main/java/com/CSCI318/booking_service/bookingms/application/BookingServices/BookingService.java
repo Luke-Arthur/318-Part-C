@@ -63,14 +63,6 @@ public class BookingService {
             // Save the booking and publish the event
             Booking savedBooking = saveAndPublishBooking(booking);
 
-            // Trigger Kafka event
-            try {
-                String memberEmail = savedBooking.getMember().getEmail();
-                String eventJson = objectMapper.writeValueAsString(new BookingCreatedEvent(savedBooking.getId(),memberEmail));
-                kafkaProducer.sendMessage("booking-created", eventJson);
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
          return savedBooking;
 
         } catch (EntityNotFoundException e) {
@@ -94,13 +86,6 @@ public class BookingService {
                 // Save the booking and publish the event
                 saveAndPublishBooking(booking);
 
-                try {
-                    String email = booking.getMember().getEmail();
-                    String eventJson = objectMapper.writeValueAsString(new BookingCreatedEvent(booking.getId(), email));
-                    kafkaProducer.sendMessage("booking-created", eventJson);
-                } catch (JsonProcessingException e) {
-                    e.printStackTrace();
-                }
             }
             return bookings;
         } catch (EntityNotFoundException e) {
@@ -135,7 +120,7 @@ public class BookingService {
     }
 
 
-    // Helper method to save the booking and publish the event (same same for both create methods)
+//    // Helper method to save the booking and publish the event (same same for both create methods)
     private Booking saveAndPublishBooking(Booking booking) {
         // Save the booking entity
         Booking savedBooking = bookingRepository.save(booking);
@@ -189,17 +174,22 @@ public class BookingService {
 
     // Method to handle deleting a booking and sending a Kafka event
     public void deleteBooking(Long id) {
+        // Retrieve the booking before deleting
+        BookingDTO booking = getBookingById(id);
+
+        // Proceed to delete the booking
         bookingRepository.deleteById(id);
 
+        // Send Kafka event after deletion
         try {
-            String email = getBookingById(id).getMember().getEmail();
+            String email = booking.getMember().getEmail();
             String eventJson = objectMapper.writeValueAsString(new BookingCancelledEvent(id, email));
             kafkaProducer.sendMessage("booking-cancelled", eventJson);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-
     }
+
 
 
 
