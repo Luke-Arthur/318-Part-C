@@ -19,9 +19,6 @@ These services operate independently and communicate using REST APIs and Kafka f
 - **Apache Kafka**: Used for event-driven communication.
 - **Kafka Streams**: Used to process real-time booking events.
 - **H2 Database**: In-memory database for development and testing.
-- **PostgreSQL**: Used in the Notification Service.
-- **Docker**: (Optional) For containerization.
-
 ---
 
 ## Services and Communication
@@ -131,6 +128,110 @@ To build and run each service, use the following command:
 - **Scenario 1**: A member books a class. The **Booking Service** publishes a `BookingCreatedEvent`. The **Notification Service** sends a booking confirmation, and the **Real-Time Analytics Service** updates the total count of bookings created.
 - **Scenario 2**: A member cancels a booking. The **Booking Service** publishes a `BookingCancelledEvent`. The **Notification Service** sends a cancellation notification, and the **Real-Time Analytics Service** updates the total count of bookings cancelled.
 ---
+
+---
+> # cURL commands
+---
+
+# Workout Classes
+
+## Create one workout class
+```bash
+curl -X POST "http://localhost:8083/api/workoutclasses" -H "Content-Type: application/json" -d "{\"id\":1,\"className\":\"Surf Fitness\",\"instructor\":\"Kelly Slater\",\"description\":\"A class focused on building the endurance and strength needed for surfing.\"}"
+```
+```bash
+curl -X POST "http://localhost:8083/api/workoutclasses" -H "Content-Type: application/json" -d "{\"id\":2,\"className\":\"Flexibility and Balance\",\"instructor\":\"Stephanie Gilmore\",\"description\":\"Improve your flexibility and balance to master surfing with fluidity.\"}"
+```
+```bash
+curl -X POST "http://localhost:8083/api/workoutclasses" -H "Content-Type: application/json" -d "{\"id\":3,\"className\":\"Power Surfing\",\"instructor\":\"Gabriel Medina\",\"description\":\"A high-intensity workout focused on building the power and explosiveness needed for big wave surfing.\"}"
+```
+```bash
+curl -X POST "http://localhost:8083/api/workoutclasses" -H "Content-Type: application/json" -d "{\"id\":4,\"className\":\"Ocean Strength\",\"instructor\":\"John John Florence\",\"description\":\"Strength training for surfers, focusing on endurance and adaptability in challenging ocean conditions.\"}"
+```
+## Read all workout classes
+```bash
+curl -X GET "http://localhost:8083/api/workoutclasses"
+```
+## Read one workout class
+```bash
+curl -X GET "http://localhost:8083/api/workoutclasses/1"
+```
+
+# Members
+
+## Create one member
+```bash
+curl -X POST "http://localhost:8081/api/members" -H "Content-Type: application/json" -d "{\"id\":1,\"firstName\":\"Kelly\",\"lastName\":\"Slater\",\"email\":\"kelly.slater@surfline.com\",\"phoneNumber\":\"+61 2 9012 3456\"}"
+```
+```bash
+curl -X POST "http://localhost:8081/api/members" -H "Content-Type: application/json" -d "{\"id\":2,\"firstName\":\"Stephanie\",\"lastName\":\"Gilmore\",\"email\":\"stephanie.gilmore@surfline.com\",\"phoneNumber\":\"+61 2 9012 3456\"}"
+```
+```bash
+curl -X POST "http://localhost:8081/api/members" -H "Content-Type: application/json" -d "{\"id\":3,\"firstName\":\"Gabriel\",\"lastName\":\"Medina\",\"email\":\"gabriel.medina@surfline.com\",\"phoneNumber\":\"+61 2 9012 3456\"}"
+```
+```bash
+curl -X POST "http://localhost:8081/api/members" -H "Content-Type: application/json" -d "{\"id\":4,\"firstName\":\"John\",\"lastName\":\"Florence\",\"email\":\"john.florence@surfline.com\",\"phoneNumber\":\"+61 2 9012 3456\"}"
+```
+## Read all members
+```bash
+curl -X GET "http://localhost:8081/api/members"
+```
+## Read one member
+```bash
+curl -X GET "http://localhost:8081/api/members/1"
+```
+
+
+# Bookings
+## Create one booking
+```bash
+curl -X POST "http://localhost:8082/api/bookings" -H "Content-Type: application/json" -d "{\"id\": 1, \"member\": {\"id\": 1}, \"workoutClass\": {\"id\": 1}}"
+```
+```bash
+curl -X POST "http://localhost:8082/api/bookings" -H "Content-Type: application/json" -d "{\"id\": 2, \"member\": {\"id\": 2}, \"workoutClass\": {\"id\": 2}}"
+```
+```bash
+curl -X POST "http://localhost:8082/api/bookings" -H "Content-Type: application/json" -d "{\"id\": 3, \"member\": {\"id\": 3}, \"workoutClass\": {\"id\": 3}}"
+```
+```bash
+curl -X POST "http://localhost:8082/api/bookings" -H "Content-Type: application/json" -d "{\"id\": 4, \"member\": {\"id\": 4}, \"workoutClass\": {\"id\": 4}}"
+```
+## Create bulk bookings (4 total)
+```bash
+curl -X POST "http://localhost:8082/api/bookings/bulk" -H "Content-Type: application/json" -d "[{\"id\": 1, \"member\": {\"id\": 1}, \"workoutClass\": {\"id\": 1}}, {\"id\": 2, \"member\": {\"id\": 2}, \"workoutClass\": {\"id\": 2}}, {\"id\": 3, \"member\": {\"id\": 3}, \"workoutClass\": {\"id\": 3}}, {\"id\": 4, \"member\": {\"id\": 4}, \"workoutClass\": {\"id\": 4}}]"
+```
+
+## Read bookings in range (end date must be > today's date)
+```bash
+curl -i -H "Content-Type: application/json" -X GET "http://localhost:8082/api/bookings/range?start=2024-09-09T00:00:00&end=2024-09-30T23:59:59"
+```
+## Read all bookings
+```bash
+curl -i -H "Content-Type: application/json" -X GET "http://localhost:8082/api/bookings"
+```
+## Read one booking
+```bash
+curl -i -H "Content-Type: application/json" -X GET "http://localhost:8082/api/bookings/1"
+```
+
+
+---
+> #### The *Delete*  Use Cases
+> Note: This is last due to the database auto-incrementation. Otherwise you will need to make sure the IDs are correct or the specific object is found / created, and then update the ID in the delete command or on the specific object.
+> Otherwise you will get an exception. `booking: {x}, {entity} Class with ID {x} not found. A booking cannot be created without a valid {entity} Class.` 
+
+## Delete one workout class
+```bash
+curl -X DELETE "http://localhost:8083/api/workoutclasses/1"
+```
+## Delete one member
+```bash
+curl -X DELETE "http://localhost:8081/api/members/1"
+```
+## Delete one booking
+```bash
+curl -X DELETE "http://localhost:8082/api/bookings/1"
+```
 
 ## Configuration
 
