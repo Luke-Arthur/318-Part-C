@@ -18,13 +18,13 @@ public class NotificationService {
     private NotificationRepository notificationRepository;
 
     @Autowired
-    private ObjectMapper objectMapper; // For deserialization
+    private ObjectMapper objectMapper;
 
     // Handle BookingCreated Event
     @KafkaListener(topics = "booking-created", groupId = "notification-group")
     public void handleBookingCreated(String message) {
         try {
-            // Deserialize the message into BookingCreatedEvent
+            // Deserialising the message into BookingCreatedEvent
             BookingCreatedEvent event = objectMapper.readValue(message, BookingCreatedEvent.class);
             Notification notification = new Notification();
             notification.setMessage("Booking Created for Booking ID: " + event.getBookingId());
@@ -42,7 +42,7 @@ public class NotificationService {
     @KafkaListener(topics = "booking-updated", groupId = "notification-group")
     public void handleBookingUpdated(String message) {
         try {
-            // Deserialize the message into BookingUpdatedEvent
+            // Deserialising the message into BookingUpdatedEvent
             BookingUpdatedEvent event = objectMapper.readValue(message, BookingUpdatedEvent.class);
             Notification notification = new Notification();
             notification.setMessage("Booking Updated for Booking ID: " + event.getBookingId());

@@ -20,7 +20,7 @@ public class BookingCreatedEvent {
         this.eventType = null;
     }
 
-    // Constructor with bookingId and memberEmail
+    // Constructor with bookingId, memberEmail, and classId
     public BookingCreatedEvent(Long bookingId, String memberEmail) {
         this.bookingId = bookingId;
         this.memberEmail = memberEmail;
