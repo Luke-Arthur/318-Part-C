@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor
-
 public class BookingCancelledEvent {
 
     private final Long bookingId;
@@ -16,7 +15,7 @@ public class BookingCancelledEvent {
     private final LocalDateTime eventTime;
     private final String eventType;
 
-    // Default constructor for cancelled event
+    // Default constructor
     public BookingCancelledEvent() {
         this.bookingId = null;
         this.eventTime = LocalDateTime.now();
@@ -24,13 +23,11 @@ public class BookingCancelledEvent {
         this.memberEmail = null;
     }
 
-    // all args constructor for cancelled event
+    // Constructor with bookingId, memberEmail, and classId
     public BookingCancelledEvent(Long bookingId, String memberEmail) {
         this.bookingId = bookingId;
+        this.memberEmail = memberEmail;
         this.eventTime = LocalDateTime.now();
         this.eventType = "cancelled";
-        this.memberEmail = memberEmail;
     }
-
-
 }
