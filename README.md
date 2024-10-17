@@ -61,7 +61,45 @@ The **Real-Time Analytics Service** listens to the same Kafka topics (`booking-c
 
 ---
 
+## Event Triggers
+
+- **BookingCreatedEvent**: When a member creates a booking, this event is triggered, notifying the **Notification Service** to send a confirmation, and the **Real-Time Analytics Service** to update booking statistics.
+- **BookingUpdatedEvent**: When a booking is updated, this event is triggered, notifying the **Notification Service** to send an update to the member.
+- **BookingCancelledEvent**: When a member cancels a booking, this event is triggered, notifying the **Notification Service** to send a cancellation notification, and the **Real-Time Analytics Service** to update the cancellation statistics.
+
+---
 ## Running the Services
+
+---
+
+## How to Start Kafka and Zookeeper on Windows Locally
+
+1. **Download Kafka**:  
+   Download the latest Kafka binaries from [here](https://kafka.apache.org/downloads) and extract the ZIP file to a desired location.
+2. **Start Zookeeper**:  
+   Open a new command prompt and navigate to the Kafka directory. Run the following command to start Zookeeper:
+   ```bash
+   .\bin\windows\zookeeper-server-start.bat .\config\zookeeper.properties
+   ```
+3. **Start Kafka Server**:
+    Open a new command prompt and navigate to the Kafka directory. Run the following command to start the Kafka server:
+    ```bash
+    .\bin\windows\kafka-server-start.bat .\config\server.properties
+    ```
+4. **Create Kafka Topics**:
+    Open a new command prompt and navigate to the Kafka directory. Run the following command to create the required Kafka topics:
+    ```bash
+    .\bin\windows\kafka-topics.bat --create --topic booking-created --bootstrap-server localhost:9092
+    .\bin\windows\kafka-topics.bat --create --topic booking-updated --bootstrap-server localhost:9092
+    .\bin\windows\kafka-topics.bat --create --topic booking-cancelled --bootstrap-server localhost:9092
+    ```
+5. **Verify Topics**
+    To verify that the topics have been created successfully, run the following command:
+    ```bash
+    .\bin\windows\kafka-topics.bat --list --bootstrap-server localhost:9092
+    ```
+6. **Start the Services**:
+    Start the services as described in the next section.
 
 ### Clone the Repositories
 ```bash
@@ -125,9 +163,42 @@ To build and run each service, use the following command:
 
 ## Example Use Cases
 
-- **Scenario 1**: A member books a class. The **Booking Service** publishes a `BookingCreatedEvent`. The **Notification Service** sends a booking confirmation, and the **Real-Time Analytics Service** updates the total count of bookings created.
-- **Scenario 2**: A member cancels a booking. The **Booking Service** publishes a `BookingCancelledEvent`. The **Notification Service** sends a cancellation notification, and the **Real-Time Analytics Service** updates the total count of bookings cancelled.
+- **Scenario 1**: Create a new workout class.
+- **Scenario 2**: Register a new member.
+- **Scenario 3**: Book a workout class.
+- **Scenario 4**: Update a booking.
+- **Scenario 5**: Cancel a booking (delete).
+- **Scenario 6**: View all bookings.
+- **Scenario 7**: View all members.
+- **Scenario 8**: View all workout classes.
+- **Scenario 9**: View all notifications (booking events).
+- **Scenario 10**: View real-time analytics (total bookings created and cancelled).
+- **Scenario 11**: Delete a workout class.
+- **Scenario 12**: Delete a member.
+- **Scenario 13**: Delete a booking.
+- **Scenario 14**: Create multiple bookings in bulk.
+- **Scenario 15**: View bookings within a date range.
+- **Scenario 16**: View a specific member.
+- **Scenario 17**: View a specific workout class.
+- **Scenario 18**: View a specific booking.
+- **Scenario 19**: Update a workout class.
+- **Scenario 20**: Update a member.
+- **Scenario 21**: Update a booking.
+- **Scenario 22**: View bookings created by a specific member.
+- **Scenario 23**: View bookings for a specific workout class.
+- **Scenario 24**: View bookings for a specific member.
+- **Scenario 25**: View bookings for a specific workout class.
 ---
+
+## ```Constraints```
+
+- ``` Booking Service:``` A booking cannot be created without a valid workout class.
+- ```Notification Service```: A notification cannot be sent without a valid booking.
+- ```Real-Time Analytics Service:``` Real-time analytics cannot be updated without a valid booking event.
+- ```Workout Class Service:``` A workout class cannot be created without a valid instructor.
+- ```Member Service:``` A member cannot be created without a valid details.
+- ```Booking Service:``` A booking cannot be created without a valid member.
+- ```Booking Service:``` A booking cannot be created without a valid workout class.
 
 ---
 > # cURL commands
@@ -213,6 +284,26 @@ curl -i -H "Content-Type: application/json" -X GET "http://localhost:8082/api/bo
 ```bash
 curl -i -H "Content-Type: application/json" -X GET "http://localhost:8082/api/bookings/1"
 ```
+## Update one booking
+```bash
+curl -X PUT "http://localhost:8082/api/bookings/1" -H "Content-Type: application/json" -d "{\"member\": {\"id\": 1}, \"workoutClass\": {\"id\": 1}, \"bookingTime\": \"2024-10-16T14:59:00\"}"
+```
+# Notifications
+## Read all notifications - reads all the use booking created, updated, and cancelled events
+```bash
+curl -X GET "http://localhost:8084/api/notifications"
+```
+
+# Real-Time Analytics
+## Read total bookings created
+```bash
+curl -X GET "http://localhost:8085/bookings/created"
+```
+## Read total bookings cancelled
+```bash
+curl -X GET "http://localhost:8085/bookings/cancelled"
+```
+
 
 
 ---
@@ -228,7 +319,7 @@ curl -X DELETE "http://localhost:8083/api/workoutclasses/1"
 ```bash
 curl -X DELETE "http://localhost:8081/api/members/1"
 ```
-## Delete one booking
+## Delete one booking - Note: This will trigger a notification event and update the real-time analytics
 ```bash
 curl -X DELETE "http://localhost:8082/api/bookings/1"
 ```
