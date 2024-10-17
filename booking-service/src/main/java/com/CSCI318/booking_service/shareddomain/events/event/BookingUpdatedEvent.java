@@ -21,7 +21,7 @@ public class BookingUpdatedEvent {
         this.eventType = null;
     }
 
-    // All args constructor for updated event
+    // Constructor with bookingId, memberEmail, and classId
     public BookingUpdatedEvent(Long bookingId, String memberEmail) {
         this.bookingId = bookingId;
         this.eventTime = LocalDateTime.now();

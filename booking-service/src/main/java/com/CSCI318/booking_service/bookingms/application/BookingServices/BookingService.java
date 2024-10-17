@@ -120,14 +120,21 @@ public class BookingService {
     }
 
 
-//    // Helper method to save the booking and publish the event (same same for both create methods)
     private Booking saveAndPublishBooking(Booking booking) {
         // Save the booking entity
         Booking savedBooking = bookingRepository.save(booking);
 
-      try {
+        try {
             String email = savedBooking.getMember().getEmail();
-            String eventJson = objectMapper.writeValueAsString(new BookingCreatedEvent(savedBooking.getId(), email));
+            BookingCreatedEvent event = new BookingCreatedEvent(savedBooking.getId(), email);
+
+            // Convert the event to JSON
+            String eventJson = objectMapper.writeValueAsString(event);
+
+            // Log the JSON to verify its structure
+            System.out.println("Sending event JSON to Kafka: " + eventJson);
+
+            // Send the JSON to Kafka
             kafkaProducer.sendMessage("booking-created", eventJson);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
@@ -136,12 +143,10 @@ public class BookingService {
         return savedBooking;
     }
 
+
     @Transactional
     public Booking updateBooking(Booking booking) {
-        // Refactored method to fetch member and workout class details and set them in the booking
         setMemberAndWorkoutClassDetails(booking);
-
-        // Update the booking entity
         Booking updatedBooking = bookingRepository.save(booking);
 
         try {
@@ -153,6 +158,7 @@ public class BookingService {
         }
         return updatedBooking;
     }
+
 
 
 
@@ -174,13 +180,9 @@ public class BookingService {
 
     // Method to handle deleting a booking and sending a Kafka event
     public void deleteBooking(Long id) {
-        // Retrieve the booking before deleting
         BookingDTO booking = getBookingById(id);
-
-        // Proceed to delete the booking
         bookingRepository.deleteById(id);
 
-        // Send Kafka event after deletion
         try {
             String email = booking.getMember().getEmail();
             String eventJson = objectMapper.writeValueAsString(new BookingCancelledEvent(id, email));
