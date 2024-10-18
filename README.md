@@ -75,28 +75,28 @@ The **Real-Time Analytics Service** listens to the same Kafka topics (`booking-c
 ## How to Start Kafka and Zookeeper on Windows Locally
 
 1. **Download Kafka**:  
-   Download the latest Kafka binaries from [here](https://kafka.apache.org/downloads) and extract the ZIP file to a desired location.
+   Download the latest Kafka binaries from [here](https://kafka.apache.org/downloads) and Create a new file in your C: drive called kafka. Extract the ZIP file to this new folder.
 2. **Start Zookeeper**:  
    Open a new command prompt and navigate to the Kafka directory. Run the following command to start Zookeeper:
    ```bash
-   .\bin\windows\zookeeper-server-start.bat .\config\zookeeper.properties
+   C:\kafka\kafka_2.13-3.8.0\bin\windows\zookeeper-server-start.bat C:\kafka\kafka_2.13-3.8.0\config\zookeeper.properties
    ```
 3. **Start Kafka Server**:
     Open a new command prompt and navigate to the Kafka directory. Run the following command to start the Kafka server:
     ```bash
-    .\bin\windows\kafka-server-start.bat .\config\server.properties
+    C:\kafka\kafka_2.13-3.8.0\bin\windows\kafka-server-start.bat C:\kafka\kafka_2.13-3.8.0\config\server.properties
     ```
 4. **Create Kafka Topics**:
     Open a new command prompt and navigate to the Kafka directory. Run the following command to create the required Kafka topics:
     ```bash
-    .\bin\windows\kafka-topics.bat --create --topic booking-created --bootstrap-server localhost:9092
-    .\bin\windows\kafka-topics.bat --create --topic booking-updated --bootstrap-server localhost:9092
-    .\bin\windows\kafka-topics.bat --create --topic booking-cancelled --bootstrap-server localhost:9092
+    C:\kafka\kafka_2.13-3.8.0\bin\windows\kafka-topics.bat --create --topic booking-created --bootstrap-server localhost:9092
+    C:\kafka\kafka_2.13-3.8.0\bin\windows\kafka-topics.bat --create --topic booking-updated --bootstrap-server localhost:9092
+    C:\kafka\kafka_2.13-3.8.0\bin\windows\kafka-topics.bat --create --topic booking-cancelled --bootstrap-server localhost:9092
     ```
 5. **Verify Topics**
     To verify that the topics have been created successfully, run the following command:
     ```bash
-    .\bin\windows\kafka-topics.bat --list --bootstrap-server localhost:9092
+    C:\kafka\kafka_2.13-3.8.0\bin\windows\kafka-topics.bat --list --bootstrap-server localhost:9092
     ```
 6. **Start the Services**:
     Start the services as described in the next section.
