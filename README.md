@@ -274,7 +274,7 @@ curl -X POST "http://localhost:8082/api/bookings/bulk" -H "Content-Type: applica
 
 ## Read bookings in range (end date must be > today's date)
 ```bash
-curl -i -H "Content-Type: application/json" -X GET "http://localhost:8082/api/bookings/range?start=2024-09-09T00:00:00&end=2024-09-30T23:59:59"
+curl -i -H "Content-Type: application/json" -X GET "http://localhost:8082/api/bookings/range?start=2024-09-09T00:00:00&end=2024-10-30T23:59:59"
 ```
 ## Read all bookings
 ```bash
